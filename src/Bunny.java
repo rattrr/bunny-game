@@ -9,6 +9,7 @@ public class Bunny {
     private ArrayList<Image> runningRight = new ArrayList<>();
     private ArrayList<Image> defaultStates = new ArrayList<>();
     private Image currentState;
+    private String looking = "RIGHT";
 
     private int posX;
     private int posY;
@@ -20,18 +21,43 @@ public class Bunny {
         currentState = defaultStates.get(0);
     }
 
-    public Image moveLeft(){
+    public void render(GraphicsContext gc){
+        gc.drawImage(currentState, posX, posY);
+    }
+
+
+    public void moveLeft(){
         posX -= 1;
-        return runningLeft.get((int)currentRunningStatePos);
+        looking = "LEFT";
+        currentRunningStatePos = (currentRunningStatePos + 0.2)%runningLeft.size();
+        currentState = runningLeft.get((int)currentRunningStatePos);
     }
 
-    public Image moveRight(){
+    public void moveRight(){
         posX += 1;
-        return runningRight.get((int)currentRunningStatePos);
+        looking = "RIGHT";
+        currentRunningStatePos = (currentRunningStatePos +0.2)%runningRight.size();
+        currentState = runningRight.get((int)currentRunningStatePos);
     }
 
-    public Image getCurrentState(){
-        return currentState;
+    public Boolean looksRight(){
+        return looking.equals("RIGHT");
+    }
+
+    public Boolean looksLeft(){
+        return looking.equals("LEFT");
+    }
+
+    public void setStandingState(){
+        currentState = defaultStates.get(2);
+    }
+
+    public void setDefaultStateRight(){
+        currentState = defaultStates.get(0);
+    }
+
+    public void setDefaultStateLeft(){
+        currentState = defaultStates.get(1);
     }
 
     public int getPosX() {
@@ -45,6 +71,7 @@ public class Bunny {
     private void fillStateLists(){
         defaultStates.add(new Image("file:img/default_bunny_right.png"));
         defaultStates.add(new Image("file:img/default_bunny_left.png"));
+        defaultStates.add(new Image("file:img/bunny_stand.png"));
         runningLeft.add(new Image("file:img/bunny_runleft1.png"));
         runningLeft.add(new Image("file:img/bunny_runleft3.png"));
         runningLeft.add(new Image("file:img/bunny_runleft4.png"));
