@@ -23,28 +23,22 @@ public class GameLoop extends AnimationTimer {
 
     @Override
     public void handle(long now) {
+        fall();
         if(keyboardInput.contains("LEFT")){
-            gm.redraw();
-            bunny.moveLeft();
-            gm.render(bunny);
+            run(Direction.LEFT);
         }
         if(keyboardInput.contains("RIGHT")){
-            gm.redraw();
-            bunny.moveRight();
-            gm.render(bunny);
+            run(Direction.RIGHT);
         }
         if(keyboardInput.contains("UP")){
             gm.redraw();
             if (bunny.looksRight() && bunny.isStanding()) {
                 bunny.setJumpingStateRight();
-                for(int i=0; i<50; i++){
-                    gm.redraw();
-                    bunny.jump();
-                    gm.render(bunny);
-                }
+                jump();
                 gm.render(bunny);
-            } else if(bunny.looksLeft()){
+            } else if(bunny.looksLeft() && bunny.isStanding()){
                 bunny.setJumpingStateLeft();
+                jump();
                 gm.render(bunny);
             }
             gm.render(bunny);
@@ -59,7 +53,40 @@ public class GameLoop extends AnimationTimer {
                 gm.render(bunny);
             }
         }
+
     }
+
+    private void run(Direction dir){
+        gm.redraw();
+        if(!gm.detectCollision(bunny)) {
+            bunny.move(dir);
+        }else{
+            bunny.throwback(dir);
+        }
+        gm.render(bunny);
+    }
+
+    private void jump(){
+        for(int i=0; i<50; i++){
+            gm.redraw();
+            if(gm.detectCollision(bunny)){
+                bunny.throwback(Direction.UP);
+                break;
+            }
+                bunny.jump();
+                //bunny.moveLeft();
+
+            gm.render(bunny);
+        }
+    }
+
+    private void fall(){
+        while(!gm.wouldBeCollision(bunny)){
+            bunny.fall();
+            gm.render(bunny);
+        }
+    }
+
     private void listen(Scene scene){
         scene.setOnKeyPressed(
                 new EventHandler<KeyEvent>(){

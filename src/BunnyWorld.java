@@ -24,10 +24,12 @@ public class BunnyWorld extends Application {
 
         Canvas canvas = new Canvas(sceneWidth, sceneHeight);
         root.getChildren().add(canvas);
+        //Player bunny = new Player(50, 313);
+        Player bunny = new Player(155, 200);
         GraphicsContext gc = canvas.getGraphicsContext2D();
-        GameMap gm = new GameMap(gc, sceneWidth, sceneHeight);
+        GameMap gm = new GameMap(gc, bunny, sceneWidth, sceneHeight);
 
-        GameLoop gl = new GameLoop(scene, new Player(50, 314), gm);
+        GameLoop gl = new GameLoop(scene, bunny, gm);
         gl.start();
 
         primaryStage.show();

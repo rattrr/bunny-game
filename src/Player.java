@@ -1,3 +1,4 @@
+import javafx.geometry.Rectangle2D;
 import javafx.scene.image.Image;
 
 import java.util.ArrayList;
@@ -28,28 +29,46 @@ public class Player implements Renderable {
         return currentState;
     }
 
+    public Rectangle2D getBoundary(){
+        return new Rectangle2D(posX, posY, currentState.getWidth(), currentState.getHeight());
+    };
 
-    public void moveLeft(){
-        posX -= 1;
-        looking = "LEFT";
-        currentRunningStatePos = (currentRunningStatePos + 0.2)%runningLeft.size();
-        currentState = runningLeft.get((int)currentRunningStatePos);
+    public void throwback(Direction dir){
+        if(dir == Direction.LEFT) {
+            posX += 6;
+        } else if(dir ==Direction.RIGHT){
+            posX -= 3;
+        } else if(dir == Direction.UP){
+            posY += 3;
+        }
+    }
+
+    public void move(Direction dir){
+        if(dir == Direction.LEFT){
+            posX -= 1;
+            looking = "LEFT";
+            currentRunningStatePos = (currentRunningStatePos + 0.2)%runningLeft.size();
+            currentState = runningLeft.get((int)currentRunningStatePos);
+        }else if(dir == Direction.RIGHT){
+            posX += 1;
+            looking = "RIGHT";
+            currentRunningStatePos = (currentRunningStatePos +0.2)%runningRight.size();
+            currentState = runningRight.get((int)currentRunningStatePos);
+        }
     }
 
     public void jump(){
         posY = posY - 1;
     }
 
-    public Boolean isStanding(){
-        return currentState == defaultStates.get(0);
+    public void fall(){
+        posY += 1;
     }
 
-    public void moveRight(){
-        posX += 1;
-        looking = "RIGHT";
-        currentRunningStatePos = (currentRunningStatePos +0.2)%runningRight.size();
-        currentState = runningRight.get((int)currentRunningStatePos);
+    public Boolean isStanding(){
+        return currentState == defaultStates.get(0) || currentState == defaultStates.get(1);
     }
+
 
     public Boolean looksRight(){
         return looking.equals("RIGHT");
