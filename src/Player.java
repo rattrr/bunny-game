@@ -1,8 +1,14 @@
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.util.Duration;
 
 import java.util.ArrayList;
 
@@ -17,12 +23,13 @@ public class Player {
     private boolean falling = false;
     private ImageView playerView;
     private Image currentState;
+    private Timeline jumpingTimeline;
     private String looking = "RIGHT";
 
 
     public Player(int posX, int posY){
         fillStateLists();
-        currentState = defaultStates.get(0);
+        currentState = runningRight.get(0);
         playerView = new ImageView(currentState);
         playerView.setX(posX);
         playerView.setY(posY);
@@ -35,6 +42,36 @@ public class Player {
         if(currentState == null){
             System.out.println("Brak obrazka");
         }
+    }
+
+    public Timeline makeJumpingTimeline(double jumpHeight){
+        double y = playerView.getY() - jumpHeight;
+        Timeline tl = new Timeline();
+        tl.setCycleCount(1);
+        KeyValue kv = new KeyValue(playerView.yProperty(), y);
+        KeyFrame kf = new KeyFrame(Duration.millis(200), kv);
+        tl.getKeyFrames().add(kf);
+
+        tl.setOnFinished(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                jumping = false;
+            }
+        });
+
+        return tl;
+    }
+
+    public boolean isJumpingTimelineSet(){
+        return jumpingTimeline == null;
+    }
+
+    public void setTimeLine(Timeline tl){
+        this.jumpingTimeline = tl;
+    }
+
+    public Timeline getTimeline(){
+        return this.jumpingTimeline;
     }
 
     public void setFalling(boolean value){
@@ -80,7 +117,16 @@ public class Player {
             looking = "RIGHT";
             currentRunningStatePos = (currentRunningStatePos +0.2)%runningRight.size();
             currentState = runningRight.get((int)currentRunningStatePos);
+            playerView.setImage(currentState);
         }
+        updateShadows();
+    }
+
+    private void updateShadows(){
+        shadowLeftRight.setWidth(currentState.getWidth());
+        shadowLeftRight.setHeight(currentState.getHeight());
+        shadowDown.setWidth(currentState.getWidth());
+        shadowDown.setHeight(currentState.getHeight());
     }
 
 
@@ -120,10 +166,10 @@ public class Player {
         defaultStates.add(new Image(this.getClass().getClassLoader().getResourceAsStream("img/bunny_runleft3.png")));
         defaultStates.add(new Image(this.getClass().getClassLoader().getResourceAsStream("img/bunny_runright3.png")));
         runningLeft.add(new Image(this.getClass().getClassLoader().getResourceAsStream("img/bunny_runleft1.png")));
-        runningLeft.add(new Image(this.getClass().getClassLoader().getResourceAsStream("img/bunny_runleft3.png")));
+        //runningLeft.add(new Image(this.getClass().getClassLoader().getResourceAsStream("img/bunny_runleft3.png")));
         runningLeft.add(new Image(this.getClass().getClassLoader().getResourceAsStream("img/bunny_runleft4.png")));
         runningRight.add(new Image(this.getClass().getClassLoader().getResourceAsStream("img/bunny_runright1.png")));
-        runningRight.add(new Image(this.getClass().getClassLoader().getResourceAsStream("img/bunny_runright3.png")));
+        //runningRight.add(new Image(this.getClass().getClassLoader().getResourceAsStream("img/bunny_runright3.png")));
         runningRight.add(new Image(this.getClass().getClassLoader().getResourceAsStream("img/bunny_runright4.png")));
     }
 }

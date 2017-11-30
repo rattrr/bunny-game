@@ -1,24 +1,46 @@
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 
 import java.util.ArrayList;
 
 public class GameMap {
+    private double gameWidth = 1000;
+    private double gameHeigth = 400;
     private Image grass = new Image(this.getClass().getClassLoader().getResourceAsStream("img/grass.png"));
     private ArrayList<ImageView> blocks = new ArrayList<>();
+    private Rectangle background;
 
     public GameMap(){
 
-        blocks.add(new Block(grass, 200, 305).getImage());
-        blocks.add(new Block(grass, 380, 305).getImage());
-        blocks.add(new Block(grass, 155, 250).getImage());
+        blocks.add(new Block(grass, 100, 305).getImage());
+        blocks.add(new Block(grass, 150, 250).getImage());
+        blocks.add(new Block(grass, 200, 200).getImage());
+        blocks.add(new Block(grass, 250, 220).getImage());
+        blocks.add(new Block(grass, 295, 220).getImage());
+        blocks.add(new Block(grass, 330, 220).getImage());
+        blocks.add(new Block(grass, 380, 150).getImage());
+        blocks.add(new Block(grass, 425, 150).getImage());
         makeFloor();
+    }
+
+    public void moveBlocks(double distance){
+        for(ImageView block: blocks){
+            block.setX(block.getX() + distance);
+        }
+    }
+
+    public Rectangle getBackground(){
+        background = new Rectangle(0, 0, gameWidth, gameHeigth);
+        background.setFill(Color.LIGHTBLUE);
+        return background;
     }
 
 
     private void makeFloor() {
-        for (int i = 0; i < 1000; i += 45) {
+        for (int i = 0; i < gameWidth; i += 45) {
             Block block = new Block(grass, 0 + i, 355);
             blocks.add(block.getImage());
         }
