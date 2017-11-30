@@ -19,15 +19,19 @@ public class BunnyWorld extends Application {
     public void start(Stage primaryStage) throws Exception {
         primaryStage.setTitle("Bunny World!");
         Group root = new Group();
+        Group game = new Group();
+
         Scene scene = new Scene(root);
+        primaryStage.setResizable(false);
         primaryStage.setScene(scene);
 
-        Canvas canvas = new Canvas(sceneWidth, sceneHeight);
-        root.getChildren().add(canvas);
-        //Player bunny = new Player(50, 313);
+        root.getChildren().add(game);
         Player bunny = new Player(155, 200);
-        GraphicsContext gc = canvas.getGraphicsContext2D();
-        GameMap gm = new GameMap(gc, bunny, sceneWidth, sceneHeight);
+        GameMap gm = new GameMap();
+        game.getChildren().addAll(gm.getBlocks());
+        game.getChildren().add(bunny.getImage());
+        game.getChildren().add(bunny.getShadowLeftRight());
+        game.getChildren().add(bunny.getShadowDown());
 
         GameLoop gl = new GameLoop(scene, bunny, gm);
         gl.start();

@@ -1,22 +1,20 @@
 import javafx.animation.AnimationTimer;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.shape.Rectangle;
 
 import java.util.ArrayList;
 
 public class GameLoop extends AnimationTimer {
     ArrayList<String> keyboardInput = new ArrayList<>();
     Player bunny;
-    double sceneWidth;
-    double sceneHeight;
     GameMap gm;
 
     GameLoop(Scene scene, Player bunny, GameMap gm){
         listen(scene);
         this.bunny = bunny;
-        this.sceneWidth = scene.getWidth();
-        this.sceneHeight = scene.getHeight();
         this.gm = gm;
     }
 
@@ -31,60 +29,45 @@ public class GameLoop extends AnimationTimer {
             run(Direction.RIGHT);
         }
         if(keyboardInput.contains("UP")){
-            gm.redraw();
-            if (bunny.looksRight() && bunny.isStanding()) {
-                bunny.setJumpingStateRight();
-                jump();
-                gm.render(bunny);
-            } else if(bunny.looksLeft() && bunny.isStanding()){
-                bunny.setJumpingStateLeft();
-                jump();
-                gm.render(bunny);
-            }
-            gm.render(bunny);
+
         }
         if(keyboardInput.isEmpty()) {
-            gm.redraw();
-            if (bunny.looksRight()) {
-                bunny.setDefaultStateRight();
-                gm.render(bunny);
-            } else {
-                bunny.setDefaultStateLeft();
-                gm.render(bunny);
-            }
-        }
 
-    }
+
+    }}
 
     private void run(Direction dir){
-        gm.redraw();
-        if(!gm.detectCollision(bunny)) {
-            bunny.move(dir);
-        }else{
-            bunny.throwback(dir);
+        if(dir.equals(Direction.LEFT)){
+            bunny.getShadowLeftRight().setX(bunny.getImage().getX()-2);
+            bunny.getShadowLeftRight().setY(bunny.getImage().getY());
+            if(collision(bunny.getShadowLeftRight(), gm.getBlocks()) == null){
+                bunny.getImage().setX(bunny.getImage().getX() - 2);
+            }
+        }else if(dir.equals(Direction.RIGHT)){
+            bunny.getShadowLeftRight().setX(bunny.getImage().getX()+2);
+            bunny.getShadowLeftRight().setY(bunny.getImage().getY());
+            if(collision(bunny.getShadowLeftRight(), gm.getBlocks()) == null) {
+                bunny.getImage().setX(bunny.getImage().getX() + 2);
+            }
         }
-        gm.render(bunny);
     }
 
-    private void jump(){
-        for(int i=0; i<50; i++){
-            gm.redraw();
-            if(gm.detectCollision(bunny)){
-                bunny.throwback(Direction.UP);
-                break;
+    private ImageView collision(Rectangle player, ArrayList<ImageView> objects){
+        for (ImageView obj : objects){
+            if(player.getBoundsInLocal().intersects(obj.getBoundsInLocal())){
+                return obj;
             }
-                bunny.jump();
-                //bunny.moveLeft();
-
-            gm.render(bunny);
         }
+        return null;
     }
 
     private void fall(){
-        while(!gm.wouldBeCollision(bunny)){
-            bunny.fall();
-            gm.render(bunny);
+        bunny.getShadowDown().setX(bunny.getImage().getX());
+        bunny.getShadowDown().setY(bunny.getImage().getY());
+        while (collision(bunny.getShadowDown(), gm.getBlocks()) == null){
+            bunny.getShadowDown().setY(bunny.getShadowDown().getY()+1);
         }
+        bunny.getShadowDown().setY(bunny.getShadowDown().getY()+1);
     }
 
     private void listen(Scene scene){
