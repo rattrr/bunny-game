@@ -4,9 +4,10 @@ import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class GameMap {
+public class GameMap implements Serializable{
     private double gameWidth = 1000;
     private double gameHeigth = 400;
     private Image grass = new Image(this.getClass().getClassLoader().getResourceAsStream("img/grass.png"));
@@ -14,7 +15,10 @@ public class GameMap {
     private Rectangle background;
 
     public GameMap(){
+        //def();
+    }
 
+    public void def(){
         blocks.add(new Block(grass, 100, 305).getImage());
         blocks.add(new Block(grass, 150, 250).getImage());
         blocks.add(new Block(grass, 200, 200).getImage());
@@ -24,6 +28,10 @@ public class GameMap {
         blocks.add(new Block(grass, 380, 150).getImage());
         blocks.add(new Block(grass, 425, 150).getImage());
         makeFloor();
+    }
+
+    public void addBlock(Block block){
+        blocks.add(block.getImage());
     }
 
     public void moveBlocks(double distance){

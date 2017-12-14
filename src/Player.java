@@ -17,8 +17,8 @@ public class Player {
     private ArrayList<Image> runningLeft = new ArrayList<>();
     private ArrayList<Image> runningRight = new ArrayList<>();
     private ArrayList<Image> defaultStates = new ArrayList<>();
-    private Rectangle shadowLeftRight;
-    private Rectangle shadowDown;
+    private Shadow shadowLeftRight;
+    private Shadow shadowDown;
     private boolean jumping = false;
     private boolean falling = false;
     private ImageView playerView;
@@ -33,12 +33,8 @@ public class Player {
         playerView = new ImageView(currentState);
         playerView.setX(posX);
         playerView.setY(posY);
-        shadowLeftRight = new Rectangle(playerView.getX(), playerView.getY(), currentState.getWidth(), currentState.getHeight());
-        shadowLeftRight.setStroke(Color.DEEPPINK);
-        shadowLeftRight.setFill(Color.TRANSPARENT);
-        shadowDown = new Rectangle(playerView.getX(), playerView.getY(), currentState.getWidth(), currentState.getHeight());
-        shadowDown.setStroke(Color.DEEPPINK);
-        shadowDown.setFill(Color.TRANSPARENT);
+        shadowLeftRight = new Shadow(playerView.getX(), playerView.getY(), currentState.getWidth(), currentState.getHeight());
+        shadowDown = new Shadow(playerView.getX(), playerView.getY(), currentState.getWidth(), currentState.getHeight());
         if(currentState == null){
             System.out.println("Brak obrazka");
         }
@@ -91,11 +87,11 @@ public class Player {
     }
 
     public Rectangle getShadowLeftRight(){
-        return shadowLeftRight;
+        return shadowLeftRight.getShape();
     }
 
     public Rectangle getShadowDown(){
-        return shadowDown;
+        return shadowDown.getShape();
     }
 
     public Image getState(){
@@ -123,10 +119,10 @@ public class Player {
     }
 
     private void updateShadows(){
-        shadowLeftRight.setWidth(currentState.getWidth());
-        shadowLeftRight.setHeight(currentState.getHeight());
-        shadowDown.setWidth(currentState.getWidth());
-        shadowDown.setHeight(currentState.getHeight());
+        shadowLeftRight.getShape().setWidth(currentState.getWidth());
+        shadowLeftRight.getShape().setHeight(currentState.getHeight());
+        shadowDown.getShape().setWidth(currentState.getWidth());
+        shadowDown.getShape().setHeight(currentState.getHeight());
     }
 
 

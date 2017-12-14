@@ -1,8 +1,5 @@
 import javafx.application.Application;
 import javafx.scene.Group;
-import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.stage.Stage;
 
 
@@ -18,24 +15,33 @@ public class BunnyWorld extends Application {
 
     public void start(Stage primaryStage) throws Exception {
         primaryStage.setTitle("Bunny World!");
-        Group root = new Group();
-        Group game = new Group();
-
-        Scene scene = new Scene(root, sceneWidth, sceneHeight);
         primaryStage.setResizable(false);
-        primaryStage.setScene(scene);
+        //initGame(primaryStage);
+        initMapBuilder(primaryStage);
+    }
 
-        root.getChildren().add(game);
-        Player bunny = new Player(50, 200);
+    public void initGame(Stage primaryStage){
+        Group gameroot = new Group();
+
         GameMap gm = new GameMap();
-        game.getChildren().add(gm.getBackground());
-        game.getChildren().addAll(gm.getBlocks());
-        game.getChildren().add(bunny.getImage());
-        //game.getChildren().add(bunny.getShadowLeftRight());
-        //game.getChildren().add(bunny.getShadowDown());
+        gm.def();
 
-        GameLoop gl = new GameLoop(scene, bunny, gm);
-        gl.start();
+        GameScene gscene = new GameScene(gameroot, sceneWidth, sceneHeight, gm);
+        primaryStage.setScene(gscene);
+
+        gameroot.getChildren().add(gscene.getGameGroup());
+
+
+
+        primaryStage.show();
+    }
+
+    public void initMapBuilder(Stage primaryStage){
+        Group mbroot = new Group();
+        MapBuilderScene mbscene = new MapBuilderScene(mbroot, sceneWidth, sceneHeight+100);
+        primaryStage.setScene(mbscene);
+
+        mbroot.getChildren().add(mbscene.getMbgroup());
 
         primaryStage.show();
     }
