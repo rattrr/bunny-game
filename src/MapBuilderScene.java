@@ -51,8 +51,8 @@ public class MapBuilderScene extends Scene {
         grid.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
-                Block block = new Block(grass, findNearest(event.getX()), findNearest(event.getY()));
-                mbgroup.getChildren().add(block.getImage());
+                Block block = new Block(findNearest(event.getX()), findNearest(event.getY()));
+                mbgroup.getChildren().add(block);
                 gamemap.addBlock(block);
                 //saveMap();
             }

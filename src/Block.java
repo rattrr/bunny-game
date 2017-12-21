@@ -1,19 +1,21 @@
+import javafx.geometry.Bounds;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 
 
-public class Block {
-    private ImageView img;
+public class Block extends Rectangle implements Collidable{
 
-    public Block(Image image, int posX, int posY){
-        img = new ImageView(image);
-        img.setX(posX);
-        img.setY(posY);
+    public Block(int posX, int posY){
+        super(posX, posY, 50, 50);
+        setFill(Color.LIMEGREEN);
     }
 
-
-    public ImageView getImage() {
-        return img;
+    @Override
+    public Bounds getBounds() {
+        return getBoundsInLocal();
     }
+
 
 }

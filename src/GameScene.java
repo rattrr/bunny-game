@@ -10,12 +10,16 @@ public class GameScene extends Scene {
         super(root, width, height);
         Player bunny = new Player(50, 200);
         GameMap gm = gamemap;
+        ScoreInfo si = new ScoreInfo(720, 50);
         ggroup.getChildren().add(gm.getBackground());
         ggroup.getChildren().addAll(gm.getBlocks());
+        ggroup.getChildren().addAll(gm.getItems());
         ggroup.getChildren().add(bunny.getImage());
-        ggroup.getChildren().add(bunny.getShadowLeftRight().getShape());
-        ggroup.getChildren().add(bunny.getShadowDown().getShape());
-        gloop = new GameLoop(this, bunny, gm);
+        //ggroup.getChildren().add(bunny.getShadowLeftRight().getShape());
+        //ggroup.getChildren().add(bunny.getShadowDown().getShape());
+        //ggroup.getChildren().add(bunny.getShadowUp().getShape());
+        ggroup.getChildren().add(si);
+        gloop = new GameLoop(this, bunny, gm, si);
         gloop.start();
     }
 

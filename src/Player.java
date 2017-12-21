@@ -20,6 +20,7 @@ public class Player implements Collidable{
     private ArrayList<Image> defaultStates = new ArrayList<>();
     private Shadow shadowLeftRight;
     private Shadow shadowDown;
+    private Shadow shadowUp;
     private boolean jumping = false;
     private boolean falling = false;
     private ImageView playerView;
@@ -33,19 +34,20 @@ public class Player implements Collidable{
         playerView = new ImageView(currentState);
         playerView.setX(posX);
         playerView.setY(posY);
-        shadowLeftRight = new Shadow(playerView.getX(), playerView.getY(), currentState.getWidth(), currentState.getHeight());
-        shadowDown = new Shadow(playerView.getX(), playerView.getY(), currentState.getWidth(), currentState.getHeight());
+        shadowLeftRight = new Shadow(playerView.getX(), playerView.getY(), currentState.getWidth(), currentState.getHeight(), Color.DEEPPINK);
+        shadowDown = new Shadow(playerView.getX(), playerView.getY(), currentState.getWidth(), currentState.getHeight(), Color.ORANGERED);
+        shadowUp = new Shadow(playerView.getX(), playerView.getY(), currentState.getWidth(), currentState.getHeight(), Color.BLUE);
         if(currentState == null){
             System.out.println("Brak obrazka");
         }
     }
 
     public Timeline makeJumpingTimeline(double jumpHeight){
-        double y = playerView.getY() - jumpHeight;
+        double y = jumpHeight;
         Timeline tl = new Timeline();
         tl.setCycleCount(1);
         KeyValue kv = new KeyValue(playerView.yProperty(), y);
-        KeyFrame kf = new KeyFrame(Duration.millis(400), kv);
+        KeyFrame kf = new KeyFrame(Duration.millis(300), kv);
         tl.getKeyFrames().add(kf);
 
         tl.setOnFinished(new EventHandler<ActionEvent>() {
@@ -96,9 +98,15 @@ public class Player implements Collidable{
         return shadowDown;
     }
 
+    public Shadow getShadowUp() { return shadowUp; }
+
 
     public Image getState(){
         return currentState;
+    }
+
+    public double getY(){
+        return playerView.getY();
     }
 
     public ImageView getImage(){
@@ -135,11 +143,13 @@ public class Player implements Collidable{
     public void updateShadows(){
         shadowLeftRight.updateSize(currentState.getWidth(), currentState.getHeight());
         shadowDown.updateSize(currentState.getWidth(), currentState.getHeight());
+        shadowUp.updateSize(currentState.getWidth(), currentState.getHeight());
     }
 
     public void updateShadowsCoords(){
         shadowDown.updateCoords(playerView.getX(), playerView.getY());
         shadowLeftRight.updateCoords(playerView.getX(), playerView.getY());
+        shadowUp.updateCoords(playerView.getX(), playerView.getY());
     }
 
 

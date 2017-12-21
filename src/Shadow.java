@@ -4,9 +4,9 @@ import javafx.scene.shape.Rectangle;
 
 public class Shadow implements Collidable {
     private Rectangle shape;
-    public Shadow(double x, double y, double width, double height){
+    public Shadow(double x, double y, double width, double height, Color color){
         shape = new Rectangle(x, y, width, height);
-        shape.setStroke(Color.DEEPPINK);
+        shape.setStroke(color);
         shape.setFill(Color.TRANSPARENT);
     }
 

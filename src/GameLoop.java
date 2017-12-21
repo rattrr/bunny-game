@@ -5,9 +5,7 @@ import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
 import java.util.ArrayList;
@@ -16,18 +14,24 @@ public class GameLoop extends AnimationTimer {
     ArrayList<String> keyboardInput = new ArrayList<>();
     Player bunny;
     GameMap gm;
+    GameScene scene;
+    ScoreInfo si;
 
-    GameLoop(Scene scene, Player bunny, GameMap gm){
+    GameLoop(GameScene scene, Player bunny, GameMap gm, ScoreInfo si){
         listen(scene);
         this.bunny = bunny;
+        this.scene = scene;
         this.gm = gm;
+        this.si = si;
     }
 
 
     @Override
     public void handle(long now) {
         fall();
-        stopAnimationIfCollision();
+        //stopAnimationIfCollision();
+        collectItems();
+        checkJump(120);
 
         if(keyboardInput.contains("LEFT")){
             run(Direction.LEFT);
@@ -38,7 +42,7 @@ public class GameLoop extends AnimationTimer {
         if(keyboardInput.contains("UP")){
             if(!bunny.isJumping() && !bunny.isFalling()){
                 bunny.setJumping(true);
-                bunny.setTimeLine(bunny.makeJumpingTimeline(100));
+                bunny.setTimeLine(bunny.makeJumpingTimeline(checkJump(120)));
                 bunny.getTimeline().play();
             }
         }
@@ -47,8 +51,26 @@ public class GameLoop extends AnimationTimer {
 
     }}
 
+    private double checkJump(double jumpHeight){
+        bunny.updateShadowsCoords();
+        double targetY = bunny.getY() - jumpHeight;
+        while(bunny.getShadowUp().getY() > targetY && collision(bunny.getShadowUp(), gm.getBlocks()) == null){
+            bunny.getShadowUp().move(Direction.UP, 1);
+        }
+        return bunny.getShadowUp().getY()+1;
+    }
+
+    private void collectItems(){
+        Collidable collectable = collision(bunny, gm.getItems());
+        if(collectable != null){
+            gm.getItems().remove(collectable);
+            scene.getGameGroup().getChildren().remove(collectable);
+            si.increment();
+        }
+    }
+
     private void stopAnimationIfCollision(){
-        ImageView collided_object = collision(bunny, gm.getBlocks());
+        Collidable collided_object = collision(bunny.getShadowLeftRight(), gm.getBlocks());
         if(collided_object != null){
             if(bunny.getTimeline() != null){
                 bunny.getTimeline().stop();
@@ -62,32 +84,33 @@ public class GameLoop extends AnimationTimer {
     }
 
     private void run(Direction dir){
-        int speed = 3;
+        int speed = 2;
         if(dir.equals(Direction.LEFT)){
             bunny.getShadowLeftRight().move(Direction.LEFT, speed);
             if((collision(bunny.getShadowLeftRight(), gm.getBlocks()) == null) ){
                 gm.moveBlocks(0.5);
                 bunny.move(dir);
-                bunny.getImage().setX(bunny.getImage().getX() - speed);
+                bunny.getImage().setX(bunny.getImage().getX() - speed-1);
             }
         }else if(dir.equals(Direction.RIGHT)){
             bunny.getShadowLeftRight().move(Direction.RIGHT, speed);
             if((collision(bunny.getShadowLeftRight(), gm.getBlocks()) == null) ){
                 gm.moveBlocks(-0.5);
                 bunny.move(dir);
-                bunny.getImage().setX(bunny.getImage().getX() + speed);
+                bunny.getImage().setX(bunny.getImage().getX() + speed+1);
             }
         }
     }
 
-    private ImageView collision(Collidable player, ArrayList<ImageView> objects){
-        for (ImageView obj : objects){
-            if(player.getBounds().intersects(obj.getBoundsInLocal())){
+    private Collidable collision(Collidable player, ArrayList<? extends Collidable> objects){
+        for (Collidable obj : objects){
+            if(player.getBounds().intersects(obj.getBounds())){
                 return obj;
             }
         }
         return null;
     }
+
 
     private void fall(){
         bunny.updateShadowsCoords();
