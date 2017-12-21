@@ -13,8 +13,8 @@ public class GameScene extends Scene {
         ggroup.getChildren().add(gm.getBackground());
         ggroup.getChildren().addAll(gm.getBlocks());
         ggroup.getChildren().add(bunny.getImage());
-        //game.getChildren().add(bunny.getShadowLeftRight());
-        //game.getChildren().add(bunny.getShadowDown());
+        ggroup.getChildren().add(bunny.getShadowLeftRight().getShape());
+        ggroup.getChildren().add(bunny.getShadowDown().getShape());
         gloop = new GameLoop(this, bunny, gm);
         gloop.start();
     }

@@ -16,8 +16,8 @@ public class BunnyWorld extends Application {
     public void start(Stage primaryStage) throws Exception {
         primaryStage.setTitle("Bunny World!");
         primaryStage.setResizable(false);
-        //initGame(primaryStage);
-        initMapBuilder(primaryStage);
+        initGame(primaryStage);
+        //initMapBuilder(primaryStage);
     }
 
     public void initGame(Stage primaryStage){

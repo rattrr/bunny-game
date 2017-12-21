@@ -3,6 +3,7 @@ import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Bounds;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -12,7 +13,7 @@ import javafx.util.Duration;
 
 import java.util.ArrayList;
 
-public class Player {
+public class Player implements Collidable{
     private double currentRunningStatePos = 0.0;
     private ArrayList<Image> runningLeft = new ArrayList<>();
     private ArrayList<Image> runningRight = new ArrayList<>();
@@ -24,7 +25,6 @@ public class Player {
     private ImageView playerView;
     private Image currentState;
     private Timeline jumpingTimeline;
-    private String looking = "RIGHT";
 
 
     public Player(int posX, int posY){
@@ -45,7 +45,7 @@ public class Player {
         Timeline tl = new Timeline();
         tl.setCycleCount(1);
         KeyValue kv = new KeyValue(playerView.yProperty(), y);
-        KeyFrame kf = new KeyFrame(Duration.millis(200), kv);
+        KeyFrame kf = new KeyFrame(Duration.millis(400), kv);
         tl.getKeyFrames().add(kf);
 
         tl.setOnFinished(new EventHandler<ActionEvent>() {
@@ -58,16 +58,16 @@ public class Player {
         return tl;
     }
 
-    public boolean isJumpingTimelineSet(){
-        return jumpingTimeline == null;
-    }
-
     public void setTimeLine(Timeline tl){
         this.jumpingTimeline = tl;
     }
 
     public Timeline getTimeline(){
         return this.jumpingTimeline;
+    }
+
+    public Bounds getBounds() {
+        return playerView.getBoundsInLocal();
     }
 
     public void setFalling(boolean value){
@@ -86,13 +86,16 @@ public class Player {
         return jumping;
     }
 
-    public Rectangle getShadowLeftRight(){
-        return shadowLeftRight.getShape();
+    public boolean isOverShadow(){ return getImage().getY() < shadowDown.getY();}
+
+    public Shadow getShadowLeftRight(){
+        return shadowLeftRight;
     }
 
-    public Rectangle getShadowDown(){
-        return shadowDown.getShape();
+    public Shadow getShadowDown(){
+        return shadowDown;
     }
+
 
     public Image getState(){
         return currentState;
@@ -106,11 +109,9 @@ public class Player {
 
     public void move(Direction dir){
         if(dir == Direction.LEFT){
-            looking = "LEFT";
             currentRunningStatePos = (currentRunningStatePos + 0.2)%runningLeft.size();
             currentState = runningLeft.get((int)currentRunningStatePos);
         }else if(dir == Direction.RIGHT){
-            looking = "RIGHT";
             currentRunningStatePos = (currentRunningStatePos +0.2)%runningRight.size();
             currentState = runningRight.get((int)currentRunningStatePos);
             playerView.setImage(currentState);
@@ -118,41 +119,27 @@ public class Player {
         updateShadows();
     }
 
-    private void updateShadows(){
-        shadowLeftRight.getShape().setWidth(currentState.getWidth());
-        shadowLeftRight.getShape().setHeight(currentState.getHeight());
-        shadowDown.getShape().setWidth(currentState.getWidth());
-        shadowDown.getShape().setHeight(currentState.getHeight());
+    public void moveTo(Direction dir, double pos){
+        switch(dir){
+            case UP:
+            case DOWN:
+                playerView.setY(pos);
+                break;
+            case LEFT:
+            case RIGHT:
+                playerView.setX(pos);
+                break;
+        }
     }
 
-
-    public Boolean isStanding(){
-        return currentState == defaultStates.get(0) || currentState == defaultStates.get(1);
+    public void updateShadows(){
+        shadowLeftRight.updateSize(currentState.getWidth(), currentState.getHeight());
+        shadowDown.updateSize(currentState.getWidth(), currentState.getHeight());
     }
 
-
-    public Boolean looksRight(){
-        return looking.equals("RIGHT");
-    }
-
-    public Boolean looksLeft(){
-        return looking.equals("LEFT");
-    }
-
-    public void setJumpingStateLeft(){
-        currentState = defaultStates.get(2);
-    }
-
-    public void setJumpingStateRight(){
-        currentState = defaultStates.get(3);
-    }
-
-    public void setDefaultStateRight(){
-        currentState = defaultStates.get(0);
-    }
-
-    public void setDefaultStateLeft(){
-        currentState = defaultStates.get(1);
+    public void updateShadowsCoords(){
+        shadowDown.updateCoords(playerView.getX(), playerView.getY());
+        shadowLeftRight.updateCoords(playerView.getX(), playerView.getY());
     }
 
 

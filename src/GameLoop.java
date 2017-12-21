@@ -27,18 +27,7 @@ public class GameLoop extends AnimationTimer {
     @Override
     public void handle(long now) {
         fall();
-
-        ImageView collided_object = collision_p(bunny, gm.getBlocks());
-        if(collided_object != null){
-            if(bunny.getTimeline() != null){
-                bunny.getTimeline().stop();
-                if(bunny.isJumping()) {
-                    bunny.getImage().setY(collided_object.getY() + 46);
-                    bunny.setJumping(false);
-                    fall();
-                }
-            }
-        }
+        stopAnimationIfCollision();
 
         if(keyboardInput.contains("LEFT")){
             run(Direction.LEFT);
@@ -58,38 +47,42 @@ public class GameLoop extends AnimationTimer {
 
     }}
 
+    private void stopAnimationIfCollision(){
+        ImageView collided_object = collision(bunny, gm.getBlocks());
+        if(collided_object != null){
+            if(bunny.getTimeline() != null){
+                bunny.getTimeline().stop();
+                if(bunny.isJumping()) {
+                    bunny.moveTo(Direction.DOWN,collided_object.getY() + 51);
+                    bunny.setJumping(false);
+                    fall();
+                }
+            }
+        }
+    }
+
     private void run(Direction dir){
+        int speed = 3;
         if(dir.equals(Direction.LEFT)){
-            bunny.getShadowLeftRight().setX(bunny.getImage().getX()-2);
-            bunny.getShadowLeftRight().setY(bunny.getImage().getY());
-            if((collision(bunny.getShadowLeftRight(), gm.getBlocks()) == null) && !bunny.isFalling()){
+            bunny.getShadowLeftRight().move(Direction.LEFT, speed);
+            if((collision(bunny.getShadowLeftRight(), gm.getBlocks()) == null) ){
                 gm.moveBlocks(0.5);
                 bunny.move(dir);
-                bunny.getImage().setX(bunny.getImage().getX() - 2);
+                bunny.getImage().setX(bunny.getImage().getX() - speed);
             }
         }else if(dir.equals(Direction.RIGHT)){
-            bunny.getShadowLeftRight().setX(bunny.getImage().getX()+2);
-            bunny.getShadowLeftRight().setY(bunny.getImage().getY());
-            if((collision(bunny.getShadowLeftRight(), gm.getBlocks()) == null) && !bunny.isFalling()){
+            bunny.getShadowLeftRight().move(Direction.RIGHT, speed);
+            if((collision(bunny.getShadowLeftRight(), gm.getBlocks()) == null) ){
                 gm.moveBlocks(-0.5);
                 bunny.move(dir);
-                bunny.getImage().setX(bunny.getImage().getX() + 2);
+                bunny.getImage().setX(bunny.getImage().getX() + speed);
             }
         }
     }
 
-    private ImageView collision(Rectangle player, ArrayList<ImageView> objects){
+    private ImageView collision(Collidable player, ArrayList<ImageView> objects){
         for (ImageView obj : objects){
-            if(player.getBoundsInLocal().intersects(obj.getBoundsInLocal())){
-                return obj;
-            }
-        }
-        return null;
-    }
-
-    private ImageView collision_p(Player player, ArrayList<ImageView> objects){
-        for (ImageView obj : objects){
-            if(player.getImage().getBoundsInLocal().intersects(obj.getBoundsInLocal())){
+            if(player.getBounds().intersects(obj.getBoundsInLocal())){
                 return obj;
             }
         }
@@ -97,14 +90,13 @@ public class GameLoop extends AnimationTimer {
     }
 
     private void fall(){
-        bunny.getShadowDown().setX(bunny.getImage().getX());
-        bunny.getShadowDown().setY(bunny.getImage().getY());
+        bunny.updateShadowsCoords();
         while (collision(bunny.getShadowDown(), gm.getBlocks()) == null){
-            bunny.getShadowDown().setY(bunny.getShadowDown().getY()+1);
+            bunny.getShadowDown().move(Direction.DOWN, 1);
         }
-        bunny.getShadowDown().setY(bunny.getShadowDown().getY()-1);
+        bunny.getShadowDown().move(Direction.UP, 1);
 
-        if((bunny.getImage().getY() < bunny.getShadowDown().getY()) && !bunny.isJumping() & !bunny.isFalling()){
+        if(bunny.isOverShadow() && !bunny.isJumping() & !bunny.isFalling()){
             bunny.setFalling(true);
             Timeline tl = new Timeline();
             tl.getKeyFrames().add(new KeyFrame(Duration.millis(200), new KeyValue(bunny.getImage().yProperty(), bunny.getShadowDown().getY())));
