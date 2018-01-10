@@ -3,9 +3,11 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 public class Shadow implements Collidable {
+    Actor actor;
     private Rectangle shape;
-    public Shadow(double x, double y, double width, double height, Color color){
-        shape = new Rectangle(x, y, width, height);
+    public Shadow(Actor actor, Color color){
+        this.actor = actor;
+        shape = new Rectangle(actor.getX(), actor.getY(), actor.getWidth(), actor.getHeight());
         shape.setStroke(color);
         shape.setFill(Color.TRANSPARENT);
     }
@@ -20,7 +22,7 @@ public class Shadow implements Collidable {
         shape.setHeight(height);
     }
 
-    public void move(Direction dir, int px){
+    public void move(Direction dir, double px){
         switch(dir){
             case UP:
                 shape.setY(shape.getY() - px);
@@ -44,7 +46,7 @@ public class Shadow implements Collidable {
         return shape.getBoundsInLocal();
     }
 
-    public Rectangle getShape(){
+    public Rectangle getCast(){
         return shape;
     }
 }

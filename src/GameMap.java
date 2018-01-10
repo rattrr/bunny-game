@@ -25,10 +25,10 @@ public class GameMap implements Serializable{
         blocks.add(new Block(150, 250));
         blocks.add(new Block(200, 250));
         blocks.add(new Block(250, 250));
-        blocks.add(new Block(400, 250));
+        blocks.add(new Block(400, 300));
         blocks.add(new Block(450, 250));
         blocks.add(new Block(550, 200));
-        blocks.add(new Block(600, 150));
+        blocks.add(new Block(600, 200));
         makeFloor();
     }
 

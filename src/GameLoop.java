@@ -1,63 +1,90 @@
 import javafx.animation.AnimationTimer;
-import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
-import javafx.animation.Timeline;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyEvent;
-import javafx.util.Duration;
+import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 public class GameLoop extends AnimationTimer {
-    ArrayList<String> keyboardInput = new ArrayList<>();
-    Player bunny;
+    LinkedList<Command> commands = new LinkedList<>();
+    LinkedList<Command> executed = new LinkedList<>();
+    Actor bunny;
     GameMap gm;
     GameScene scene;
     ScoreInfo si;
+    Shadow bunnyCastDown;
+    Shadow bunnyCastUp;
+    Direction lastDirection = Direction.RIGHT;
 
-    GameLoop(GameScene scene, Player bunny, GameMap gm, ScoreInfo si){
+    GameLoop(GameScene scene, Actor bunny, GameMap gm, ScoreInfo si){
         listen(scene);
         this.bunny = bunny;
         this.scene = scene;
         this.gm = gm;
         this.si = si;
+        this.bunnyCastDown = new Shadow(bunny, Color.DEEPPINK);
+        this.bunnyCastUp = new Shadow(bunny, Color.DEEPPINK);
+    }
+
+    public Shadow getCastDown(){
+        return bunnyCastDown;
+    }
+
+    public Shadow getCastUp(){
+        return bunnyCastUp;
     }
 
 
     @Override
     public void handle(long now) {
-        fall();
-        //stopAnimationIfCollision();
+
+        double minY = calculateMinY();
         collectItems();
-        checkJump(120);
-
-        if(keyboardInput.contains("LEFT")){
-            run(Direction.LEFT);
+        detectCollisions();
+        if(bunny.isJumping == false) {
+            bunny.fall(minY);
+            calculateMaxY(120, lastDirection);
         }
-        if(keyboardInput.contains("RIGHT")){
-            run(Direction.RIGHT);
-        }
-        if(keyboardInput.contains("UP")){
-            if(!bunny.isJumping() && !bunny.isFalling()){
-                bunny.setJumping(true);
-                bunny.setTimeLine(bunny.makeJumpingTimeline(checkJump(120)));
-                bunny.getTimeline().play();
-            }
-        }
-        if(keyboardInput.isEmpty()) {
 
+        for(Command command: commands){
+            command.execute();
+            calculateMinY();
+            executed.add(command);
+            commands.remove(command);
 
-    }}
-
-    private double checkJump(double jumpHeight){
-        bunny.updateShadowsCoords();
-        double targetY = bunny.getY() - jumpHeight;
-        while(bunny.getShadowUp().getY() > targetY && collision(bunny.getShadowUp(), gm.getBlocks()) == null){
-            bunny.getShadowUp().move(Direction.UP, 1);
+            System.out.println("Last executed command: " + executed.getLast().getClass());
         }
-        return bunny.getShadowUp().getY()+1;
+
+    }
+
+    private double calculateMinY(){
+        bunnyCastDown.updateCoords(bunny.getImage().getX() ,bunny.getImage().getY());
+        while(collision(bunnyCastDown, gm.getBlocks()) == null){
+            bunnyCastDown.move(Direction.DOWN, 1);
+        }
+        return bunnyCastDown.getY()-1;
+    }
+
+    private double calculateMaxY(double jumpheight, Direction direction){
+        double starty = bunny.getY();
+        bunnyCastUp.updateCoords(bunny.getImage().getX() ,bunny.getImage().getY());
+        while(collision(bunnyCastUp, gm.getBlocks()) == null && bunnyCastUp.getY() > starty - jumpheight ){
+            bunnyCastUp.move(Direction.UP, 1);
+            bunnyCastUp.move(direction, 0.25);
+        }
+        bunny.maxJump = bunnyCastUp.getY()+1;
+        return bunnyCastUp.getY()-1;
+    }
+
+    private void detectCollisions(){
+        if(collision(bunny, gm.getBlocks()) != null){
+            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Collision");
+            bunny.fall(calculateMinY());
+            executed.getLast().undo();
+            executed.removeLast();
+        }
     }
 
     private void collectItems(){
@@ -69,38 +96,6 @@ public class GameLoop extends AnimationTimer {
         }
     }
 
-    private void stopAnimationIfCollision(){
-        Collidable collided_object = collision(bunny.getShadowLeftRight(), gm.getBlocks());
-        if(collided_object != null){
-            if(bunny.getTimeline() != null){
-                bunny.getTimeline().stop();
-                if(bunny.isJumping()) {
-                    bunny.moveTo(Direction.DOWN,collided_object.getY() + 51);
-                    bunny.setJumping(false);
-                    fall();
-                }
-            }
-        }
-    }
-
-    private void run(Direction dir){
-        int speed = 2;
-        if(dir.equals(Direction.LEFT)){
-            bunny.getShadowLeftRight().move(Direction.LEFT, speed);
-            if((collision(bunny.getShadowLeftRight(), gm.getBlocks()) == null) ){
-                gm.moveBlocks(0.5);
-                bunny.move(dir);
-                bunny.getImage().setX(bunny.getImage().getX() - speed-1);
-            }
-        }else if(dir.equals(Direction.RIGHT)){
-            bunny.getShadowLeftRight().move(Direction.RIGHT, speed);
-            if((collision(bunny.getShadowLeftRight(), gm.getBlocks()) == null) ){
-                gm.moveBlocks(-0.5);
-                bunny.move(dir);
-                bunny.getImage().setX(bunny.getImage().getX() + speed+1);
-            }
-        }
-    }
 
     private Collidable collision(Collidable player, ArrayList<? extends Collidable> objects){
         for (Collidable obj : objects){
@@ -110,45 +105,38 @@ public class GameLoop extends AnimationTimer {
         }
         return null;
     }
-
-
-    private void fall(){
-        bunny.updateShadowsCoords();
-        while (collision(bunny.getShadowDown(), gm.getBlocks()) == null){
-            bunny.getShadowDown().move(Direction.DOWN, 1);
-        }
-        bunny.getShadowDown().move(Direction.UP, 1);
-
-        if(bunny.isOverShadow() && !bunny.isJumping() & !bunny.isFalling()){
-            bunny.setFalling(true);
-            Timeline tl = new Timeline();
-            tl.getKeyFrames().add(new KeyFrame(Duration.millis(200), new KeyValue(bunny.getImage().yProperty(), bunny.getShadowDown().getY())));
-            tl.setOnFinished(new EventHandler<ActionEvent>() {
-                @Override
-                public void handle(ActionEvent event) {
-                    bunny.setFalling(false);
-                }
-            });
-            tl.play();
-        }
+    public static <E> boolean containsInstance(LinkedList<E> list, Class<? extends E> commandClass) {
+        return list.stream().anyMatch(e -> commandClass.isInstance(e));
     }
+
 
     private void listen(Scene scene){
         scene.setOnKeyPressed(
                 new EventHandler<KeyEvent>(){
                     public void handle(KeyEvent event) {
                         String eventCode = event.getCode().toString();
-                        if(!keyboardInput.contains(eventCode)) {
-                            keyboardInput.add(eventCode);
+                        System.out.println(eventCode);
+                        switch(eventCode){
+                            case "RIGHT":
+                                if(!containsInstance(commands, MoveRight.class)){
+                                    commands.add(new MoveRight(bunny));
+                                    lastDirection = Direction.RIGHT;
+                                }
+                                break;
+                            case "LEFT":
+                                if(!containsInstance(commands, MoveLeft.class)){
+                                    commands.add(new MoveLeft(bunny));
+                                    lastDirection = Direction.LEFT;
+                                }
+                                break;
+                            case "UP":
+                                if(!containsInstance(commands, Jump.class)){
+                                    commands.add(new Jump(bunny, lastDirection));
+                                }
+                                break;
+                            case "DOWN":
+                                lastDirection = Direction.NONE;
                         }
-                    }
-                }
-        );
-
-        scene.setOnKeyReleased(
-                new EventHandler<KeyEvent>(){
-                    public void handle(KeyEvent event){
-                        keyboardInput.remove(event.getCode().toString());
                     }
                 }
         );
