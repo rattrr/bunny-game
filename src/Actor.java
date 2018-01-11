@@ -37,16 +37,24 @@ public class Actor implements Collidable{
     }
 
     public void move(Direction direction, double distance){
+        double newX = playerView.getX();
         switch(direction){
             case LEFT:
-                playerView.setX(playerView.getX()-distance);
+                newX -= distance;
                 break;
             case RIGHT:
-                playerView.setX(playerView.getX()+distance);
+                newX += distance;
                 break;
             case NONE:
                 break;
         }
+        if(newX > 0 && newX < 1950) {
+            playerView.setX(newX);
+        }
+    }
+    public void reset(){
+        playerView.setX(1);
+        playerView.setY(1);
     }
 
     public void jump(Direction direction){

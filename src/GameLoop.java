@@ -12,16 +12,16 @@ public class GameLoop extends AnimationTimer {
     LinkedList<Command> executed = new LinkedList<>();
     Actor bunny;
     GameMap gm;
-    GameScene scene;
+    GameScene gameScene;
     ScoreInfo si;
     Shadow bunnyCastDown;
     Shadow bunnyCastUp;
     Direction lastDirection = Direction.RIGHT;
 
-    GameLoop(GameScene scene, Actor bunny, GameMap gm, ScoreInfo si){
-        listen(scene);
+    GameLoop(GameScene gameScene, Actor bunny, GameMap gm, ScoreInfo si){
+        listen(gameScene);
         this.bunny = bunny;
-        this.scene = scene;
+        this.gameScene = gameScene;
         this.gm = gm;
         this.si = si;
         this.bunnyCastDown = new Shadow(bunny, Color.DEEPPINK);
@@ -70,7 +70,7 @@ public class GameLoop extends AnimationTimer {
     private double calculateMaxY(double jumpheight, Direction direction){
         double starty = bunny.getY();
         bunnyCastUp.updateCoords(bunny.getImage().getX() ,bunny.getImage().getY());
-        while(collision(bunnyCastUp, gm.getBlocks()) == null && bunnyCastUp.getY() > starty - jumpheight ){
+        while(collision(bunnyCastUp, gm.getBlocks()) == null && bunnyCastUp.getY() > starty - jumpheight  && bunnyCastUp.getY() > 0){
             bunnyCastUp.move(Direction.UP, 1);
             bunnyCastUp.move(direction, 0.25);
         }
@@ -82,8 +82,13 @@ public class GameLoop extends AnimationTimer {
         if(collision(bunny, gm.getBlocks()) != null){
             System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Collision");
             bunny.fall(calculateMinY());
-            executed.getLast().undo();
-            executed.removeLast();
+            if(!executed.isEmpty()) {
+                executed.getLast().undo();
+                executed.removeLast();
+            }else{
+                bunny.reset();
+                gameScene.getScrollRoot().setHvalue(0);
+            }
         }
     }
 
@@ -91,7 +96,7 @@ public class GameLoop extends AnimationTimer {
         Collidable collectable = collision(bunny, gm.getItems());
         if(collectable != null){
             gm.getItems().remove(collectable);
-            scene.getGameGroup().getChildren().remove(collectable);
+            gameScene.getGameGroup().getChildren().remove(collectable);
             si.increment();
         }
     }
@@ -121,12 +126,21 @@ public class GameLoop extends AnimationTimer {
                                 if(!containsInstance(commands, MoveRight.class)){
                                     commands.add(new MoveRight(bunny));
                                     lastDirection = Direction.RIGHT;
+                                    gameScene.getScrollRoot().setHvalue(gameScene.getScrollRoot().getHvalue()+0.0032);
+                                    if(si.getX()+4 < 1950) {
+                                        si.setX(si.getX() + 4);
+                                    }
+                                    System.out.println(gameScene.getScrollRoot().getHvalue());
                                 }
                                 break;
                             case "LEFT":
                                 if(!containsInstance(commands, MoveLeft.class)){
                                     commands.add(new MoveLeft(bunny));
                                     lastDirection = Direction.LEFT;
+                                    if(si.getX()-4 > 700) {
+                                        si.setX(si.getX() - 4);
+                                    }
+                                    gameScene.getScrollRoot().setHvalue(gameScene.getScrollRoot().getHvalue()-0.0032);
                                 }
                                 break;
                             case "UP":
@@ -136,6 +150,11 @@ public class GameLoop extends AnimationTimer {
                                 break;
                             case "DOWN":
                                 lastDirection = Direction.NONE;
+                                break;
+                            case "N":
+                                bunny.reset();
+                                gameScene.getScrollRoot().setHvalue(0);
+                                break;
                         }
                     }
                 }

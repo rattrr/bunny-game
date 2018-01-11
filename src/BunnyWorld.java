@@ -1,5 +1,5 @@
 import javafx.application.Application;
-import javafx.scene.Group;
+import javafx.scene.control.ScrollPane;
 import javafx.stage.Stage;
 
 
@@ -21,15 +21,13 @@ public class BunnyWorld extends Application {
     }
 
     public void initGame(Stage primaryStage){
-        Group gameroot = new Group();
+        ScrollPane gameroot = new ScrollPane();
 
         GameMap gm = new GameMap();
-        gm.def();
 
         GameScene gscene = new GameScene(gameroot, sceneWidth, sceneHeight, gm);
         primaryStage.setScene(gscene);
 
-        gameroot.getChildren().add(gscene.getGameGroup());
 
 
 
@@ -37,13 +35,12 @@ public class BunnyWorld extends Application {
     }
 
     public void initMapBuilder(Stage primaryStage){
-        Group mbroot = new Group();
-        MapBuilderScene mbscene = new MapBuilderScene(mbroot, sceneWidth, sceneHeight+100);
+        ScrollPane mbroot = new ScrollPane();
+        MapBuilderScene mbscene = new MapBuilderScene(mbroot, sceneWidth, sceneHeight+20);
         primaryStage.setScene(mbscene);
 
-        mbroot.getChildren().add(mbscene.getMbgroup());
-
         primaryStage.show();
+
     }
 
 }
