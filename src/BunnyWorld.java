@@ -1,12 +1,16 @@
 import javafx.application.Application;
+import javafx.event.EventHandler;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 
 public class BunnyWorld extends Application {
 
-    private double sceneWidth = 800;
-    private double sceneHeight = 400;
+    private MainWindow stage = new MainWindow();
 
 
     public static void main(String [] argv){
@@ -14,33 +18,11 @@ public class BunnyWorld extends Application {
     }
 
     public void start(Stage primaryStage) throws Exception {
-        primaryStage.setTitle("Bunny World!");
-        primaryStage.setResizable(false);
-        initGame(primaryStage);
-        //initMapBuilder(primaryStage);
+        stage.setTitle("Bunny World!");
+        stage.setResizable(false);
+        stage.initMenu();
     }
 
-    public void initGame(Stage primaryStage){
-        ScrollPane gameroot = new ScrollPane();
 
-        GameMap gm = new GameMap();
-
-        GameScene gscene = new GameScene(gameroot, sceneWidth, sceneHeight, gm);
-        primaryStage.setScene(gscene);
-
-
-
-
-        primaryStage.show();
-    }
-
-    public void initMapBuilder(Stage primaryStage){
-        ScrollPane mbroot = new ScrollPane();
-        MapBuilderScene mbscene = new MapBuilderScene(mbroot, sceneWidth, sceneHeight+20);
-        primaryStage.setScene(mbscene);
-
-        primaryStage.show();
-
-    }
 
 }

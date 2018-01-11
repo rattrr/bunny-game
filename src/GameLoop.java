@@ -13,7 +13,7 @@ public class GameLoop extends AnimationTimer {
     Actor bunny;
     GameMap gm;
     GameScene gameScene;
-    ScoreInfo si;
+    ScoreInfo scoreInfo;
     Shadow bunnyCastDown;
     Shadow bunnyCastUp;
     Direction lastDirection = Direction.RIGHT;
@@ -23,7 +23,7 @@ public class GameLoop extends AnimationTimer {
         this.bunny = bunny;
         this.gameScene = gameScene;
         this.gm = gm;
-        this.si = si;
+        this.scoreInfo = si;
         this.bunnyCastDown = new Shadow(bunny, Color.DEEPPINK);
         this.bunnyCastUp = new Shadow(bunny, Color.DEEPPINK);
     }
@@ -61,7 +61,7 @@ public class GameLoop extends AnimationTimer {
 
     private double calculateMinY(){
         bunnyCastDown.updateCoords(bunny.getImage().getX() ,bunny.getImage().getY());
-        while(collision(bunnyCastDown, gm.getBlocks()) == null){
+        while(collision(bunnyCastDown, gm.getBlocks()) == null && bunnyCastDown.getY() < 385){
             bunnyCastDown.move(Direction.DOWN, 1);
         }
         return bunnyCastDown.getY()-1;
@@ -97,7 +97,7 @@ public class GameLoop extends AnimationTimer {
         if(collectable != null){
             gm.getItems().remove(collectable);
             gameScene.getGameGroup().getChildren().remove(collectable);
-            si.increment();
+            scoreInfo.increment();
         }
     }
 
@@ -127,8 +127,8 @@ public class GameLoop extends AnimationTimer {
                                     commands.add(new MoveRight(bunny));
                                     lastDirection = Direction.RIGHT;
                                     gameScene.getScrollRoot().setHvalue(gameScene.getScrollRoot().getHvalue()+0.0032);
-                                    if(si.getX()+4 < 1950) {
-                                        si.setX(si.getX() + 4);
+                                    if(scoreInfo.getX()+4 < 1950) {
+                                        scoreInfo.setX(scoreInfo.getX() + 4);
                                     }
                                     System.out.println(gameScene.getScrollRoot().getHvalue());
                                 }
@@ -137,14 +137,14 @@ public class GameLoop extends AnimationTimer {
                                 if(!containsInstance(commands, MoveLeft.class)){
                                     commands.add(new MoveLeft(bunny));
                                     lastDirection = Direction.LEFT;
-                                    if(si.getX()-4 > 700) {
-                                        si.setX(si.getX() - 4);
+                                    if(scoreInfo.getX()-4 > 700) {
+                                        scoreInfo.setX(scoreInfo.getX() - 4);
                                     }
                                     gameScene.getScrollRoot().setHvalue(gameScene.getScrollRoot().getHvalue()-0.0032);
                                 }
                                 break;
                             case "UP":
-                                if(!containsInstance(commands, Jump.class)){
+                                if(!containsInstance(commands, Jump.class) && !bunny.isJumping){
                                     commands.add(new Jump(bunny, lastDirection));
                                 }
                                 break;
@@ -152,9 +152,12 @@ public class GameLoop extends AnimationTimer {
                                 lastDirection = Direction.NONE;
                                 break;
                             case "N":
+                                lastDirection = Direction.RIGHT;
                                 bunny.reset();
                                 gameScene.getScrollRoot().setHvalue(0);
                                 break;
+                            case "BACK_SPACE":
+                                gameScene.getStage().initMenu();
                         }
                     }
                 }

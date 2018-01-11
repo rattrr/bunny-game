@@ -23,4 +23,13 @@ public class MapObjectBlueprint implements Serializable{
     public double getY() {
         return y;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof MapObjectBlueprint){
+            MapObjectBlueprint other = (MapObjectBlueprint) obj;
+            return (this.getX() == other.getX() && this.getY() == other.getY());
+        }
+        return false;
+    }
 }

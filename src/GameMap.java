@@ -8,7 +8,7 @@ import java.util.ArrayList;
 public class GameMap implements Serializable{
     private ArrayList<Block> blocks = new ArrayList<>();
     private ArrayList<Coin> items = new ArrayList<>();
-    private Background background = new Background();
+    private Background background = new Background(2000, 400);
 
     public GameMap(){
         load();

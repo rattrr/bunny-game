@@ -9,8 +9,8 @@ import javafx.scene.shape.Rectangle;
 public class Background {
     private Group group = new Group();
 
-    public Background(){
-        Rectangle background = new Rectangle(2000, 400);
+    public Background(double width, double height){
+        Rectangle background = new Rectangle(width, height);
         Stop[] stops = new Stop[] { new Stop(0, Color.LIGHTPINK), new Stop(0.5, Color.WHITE), new Stop(1, Color.LIGHTYELLOW)};
         background.setFill(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, stops));
         group.getChildren().add(background);

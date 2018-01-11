@@ -63,7 +63,7 @@ public class Actor implements Collidable{
             public void handle(long now) {
                 System.out.println(playerView.getY() + " " + maxJump);
                 if(playerView.getY()-3 > maxJump) {
-                    playerView.setY(playerView.getY() - 4);
+                    playerView.setY(playerView.getY() - 3);
                     move(direction, 1);
                 }else{
                     this.stop();
