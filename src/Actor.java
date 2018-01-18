@@ -58,28 +58,28 @@ public class Actor implements Collidable{
         }
         if(newX > 0 && newX < 1950) {
             playerView.setX(newX);
-            //System.out.println(newX);
         }
+
     }
     public void reset(){
-        playerView.setX(1);
-        playerView.setY(1);
+        currentAction = Action.NONE;
+        playerView.setX(20);
+        playerView.setY(20);
     }
 
     public void jump(){
-        System.out.println("SKOK");
-        calculateMaxY(120);
+        calculateMaxY(140);
         currentAction = Action.JUMPING;
         new AnimationTimer(){
             @Override
             public void handle(long now) {
-                System.out.println(playerView.getY() + " " + maxJump);
                 if(playerView.getY()-4 > maxJump) {
                     playerView.setY(playerView.getY() - 4);
-                    move(lastDirection, 1);
+                    move(lastDirection, 2);
                 }else{
                     this.stop();
-                    currentAction = Action.NONE;
+                    currentAction = Action.FALLING;
+                    fall(calculateMinY(lastDirection), lastDirection);
                 }
             }
 
@@ -87,19 +87,19 @@ public class Actor implements Collidable{
         }.start();
     }
 
-    public void fall(double destination){
-        System.out.println("spada!");
+    public void fall(double destination, Direction direction){
         currentAction = Action.FALLING;
         new AnimationTimer(){
             @Override
             public void handle(long now) {
-               // System.out.println(now);
                 if(playerView.getY()+10 <= destination) {
                     playerView.setY(playerView.getY() +10);
+                    if(direction != Direction.NONE){
+                        move(direction, 1);
+                    }
                 }else{
                     playerView.setY(destination);
                     this.stop();
-                    //System.out.println("nie skacze");
                     currentAction = Action.NONE;
                 }
             }
@@ -109,19 +109,19 @@ public class Actor implements Collidable{
     }
 
     public void gravityCheck(){
-        double minY = calculateMinY();
-        if(minY > getY() && currentAction != Action.JUMPING && currentAction != Action.FALLING){
-           // System.out.println("is falling");
-            //currentAction = Action.FALLING;
-            fall(minY);
-            //currentAction = Action.NONE;
+        double minY = calculateMinY(Direction.NONE);
+        if(minY > getY() && (currentAction == Action.NONE || currentAction == Action.RUNNING_RIGHT || currentAction == Action.RUNNING_LEFT)){
+            fall(minY, Direction.NONE);
         }
     }
 
-    private double calculateMinY(){
+    private double calculateMinY(Direction direction){
         castDown.updateCoords(this.getImage().getX(), this.getImage().getY());
-        while(gameMap.collision(castDown, gameMap.getBlocks()) == null && castDown.getY() < 385){
+        while(gameMap.collision(castDown, gameMap.getBlocks()) == null && castDown.getY() < 402){
             castDown.move(Direction.DOWN, 1);
+            if(direction != Direction.NONE){
+                castDown.move(direction, 1);
+            }
         }
         return castDown.getY()-1;
     }
@@ -129,9 +129,9 @@ public class Actor implements Collidable{
     public void calculateMaxY(double jumpheight){
         double starty = getY();
         castUp.updateCoords(getImage().getX() ,getImage().getY());
-        while(gameMap.collision(castUp, gameMap.getBlocks()) == null && castUp.getY() > starty - jumpheight  && castUp.getY() > 0){
+        while(gameMap.collision(castUp, gameMap.getBlocks()) == null && castUp.getY() > starty - jumpheight  && castUp.getY() > 5){
             castUp.move(Direction.UP, 4);
-            castUp.move(lastDirection, 1);
+            castUp.move(lastDirection, 2);
         }
         maxJump = castUp.getY()+1;
     }
@@ -139,6 +139,13 @@ public class Actor implements Collidable{
 
     public Bounds getBounds() {
         return playerView.getBoundsInLocal();
+    }
+
+    public void displayShadows(){
+        if(currentAction == Action.NONE){
+            calculateMinY(Direction.NONE);
+            calculateMaxY(140);
+        }
     }
 
 

@@ -17,7 +17,7 @@ public class MainWindow extends Stage {
     public void initGame(){
         StackPane gameRoot = new StackPane();
 
-        GameMap gameMap = new GameMap();
+        GameMap gameMap = new GameMap(2000, 400);
 
         GameScene gameScene = new GameScene(gameRoot, this, sceneWidth, sceneHeight, gameMap);
         setScene(gameScene);

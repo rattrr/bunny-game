@@ -7,7 +7,6 @@ public class MoveRight implements Command {
 
     @Override
     public void execute() {
-        System.out.println("right");
         if((!actor.currentAction.equals(Action.FALLING) && !actor.currentAction.equals(Action.JUMPING))) {
             actor.changeStatePicture(Direction.RIGHT);
             actor.move(Direction.RIGHT, 2);

@@ -14,11 +14,11 @@ import javafx.scene.text.TextAlignment;
 
 public class Background {
     private StackPane group = new StackPane();
+    Rectangle background;
 
     public Background(double width, double height){
-        Rectangle background = new Rectangle(width, height);
-        Stop[] stops = new Stop[] { new Stop(0, Color.LIGHTPINK), new Stop(0.5, Color.WHITE), new Stop(1, Color.LIGHTYELLOW)};
-        background.setFill(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, stops));
+        background = new Rectangle(width, height);
+        setGradient(Color.LIGHTPINK, Color.WHITE, Color.LIGHTYELLOW);
         group.getChildren().add(background);
         Circle c = new Circle(100, 100, 50, Color.WHITE);
         Circle c2 = new Circle(140, 140, 50, Color.WHITE);
@@ -29,6 +29,11 @@ public class Background {
 
     public StackPane getBackground(){
         return group;
+    }
+
+    public void setGradient(Color start, Color middle, Color end){
+        Stop[] stops = new Stop[] { new Stop(0, start), new Stop(0.5, middle), new Stop(1, end)};
+        background.setFill(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, stops));
     }
 
 }

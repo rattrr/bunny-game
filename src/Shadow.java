@@ -23,19 +23,27 @@ public class Shadow implements Collidable {
     }
 
     public void move(Direction dir, double px){
+        double newX = shape.getX();
+        double newY = shape.getY();
         switch(dir){
             case UP:
-                shape.setY(shape.getY() - px);
+                newY -= px;
                 break;
             case DOWN:
-                shape.setY(shape.getY() + px);
+                newY += px;
                 break;
             case LEFT:
-                shape.setX(shape.getX() - px);
+                newX -= px;
                 break;
             case RIGHT:
-                shape.setX(shape.getX() + px);
+                newX += px;
                 break;
+        }
+        if(newX > 0 && newX < 2000) {
+            shape.setX(newX);
+        }
+        if(newY > 0 && newY < 410){
+            shape.setY(newY);
         }
     }
 

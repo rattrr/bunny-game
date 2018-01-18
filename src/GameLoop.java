@@ -2,52 +2,54 @@ import javafx.animation.AnimationTimer;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.LinkedList;
 
 public class GameLoop extends AnimationTimer {
     LinkedList<Command> commands = new LinkedList<>();
     LinkedList<Command> executed = new LinkedList<>();
     Actor bunny;
-    GameMap gm;
+    GameMap gameMap;
     GameScene gameScene;
     ScoreInfo scoreInfo;
-    long lastUpdate = 0;
 
-    GameLoop(GameScene gameScene, Actor bunny, GameMap gm, ScoreInfo si){
+    GameLoop(GameScene gameScene, Actor bunny, GameMap gameMap, ScoreInfo si){
         listen(gameScene);
         this.bunny = bunny;
         this.gameScene = gameScene;
-        this.gm = gm;
+        this.gameMap = gameMap;
         this.scoreInfo = si;
 
     }
 
     @Override
     public void handle(long now) {
-            //System.out.println(bunny.currentAction);
-            gameScene.getScrollRoot().setHvalue(gameScene.getScrollRoot().getHmax()* (bunny.getX()/2000.0));
+        if(gameMap.collidedWithGoal(bunny)) {
+            gameMap.recolor(Color.LIGHTBLUE, Color.LIGHTGREEN);
+            gameScene.displayMessage("U WIN!", 100);
+            this.stop();
+        }else if(gameMap.actorOutOfMap(bunny)) {
+            gameMap.recolor(Color.LIGHTGREY, Color.GREY);
+            gameScene.displayMessage("U LOSE!", 100);
+            this.stop();
+        }else{
+            gameScene.getScrollRoot().setHvalue(gameScene.getScrollRoot().getHmax() * ((bunny.getX() + 25) / 2000.0));
             bunny.gravityCheck();
             collectItems();
             detectCollisions();
-
             statesCheck();
 
             for (Command command : commands) {
-                if(bunny.currentAction != Action.FALLING) {
+                if (bunny.currentAction != Action.FALLING) {
                     command.execute();
                     executed.add(command);
                     commands.remove(command);
                 }
-
                 //System.out.println("Last executed command: " + executed.getLast().getClass());
-
             }
+            bunny.displayShadows();
+        }
 
     }
 
@@ -59,18 +61,13 @@ public class GameLoop extends AnimationTimer {
             commands.add(new MoveLeft(bunny));
         }
         if(bunny.currentAction == Action.NEW_JUMP){
-            System.out.println("jest ju znwou");
             commands.add(new Jump(bunny));
         }
     }
 
 
-
-
-
     private void detectCollisions(){
-        if(gm.collision(bunny, gm.getBlocks()) != null){
-            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Collision");
+        if(gameMap.collision(bunny, gameMap.getBlocks()) != null){
             bunny.gravityCheck();
             if(!executed.isEmpty()) {
                 executed.getLast().undo();
@@ -83,21 +80,13 @@ public class GameLoop extends AnimationTimer {
     }
 
     private void collectItems(){
-        Collidable collectable = gm.collision(bunny, gm.getItems());
+        Collidable collectable = gameMap.collision(bunny, gameMap.getItems());
         if(collectable != null){
-            gm.getItems().remove(collectable);
+            gameMap.getItems().remove(collectable);
             gameScene.getGameGroup().getChildren().remove(collectable);
             scoreInfo.increment();
         }
     }
-
-
-
-
-    public static <E> boolean containsInstance(LinkedList<E> list, Class<? extends E> commandClass) {
-        return list.stream().anyMatch(e -> commandClass.isInstance(e));
-    }
-
 
     private void listen(Scene scene){
         scene.setOnKeyPressed(
@@ -143,9 +132,7 @@ public class GameLoop extends AnimationTimer {
         scene.setOnKeyReleased(new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent event) {
-                String eventCode = event.getCode().toString();
                 if(bunny.currentAction == Action.RUNNING_RIGHT || bunny.currentAction == Action.RUNNING_LEFT) {
-                    System.out.println("out!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                     bunny.currentAction = Action.NONE;
                 }
             }

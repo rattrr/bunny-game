@@ -3,6 +3,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 
 
 public class GameScene extends Scene {
@@ -18,8 +21,9 @@ public class GameScene extends Scene {
         scrollableArea.setContent(gameObjects);
         scrollableArea.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scrollableArea.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        Actor bunny = new Actor(1, 1, gameMap);
+        Actor bunny = new Actor(20, 20, gameMap);
         gameObjects.getChildren().add(gameMap.getBackground());
+        gameObjects.getChildren().add(gameMap.getGoal());
         gameObjects.getChildren().addAll(gameMap.getBlocks());
         gameObjects.getChildren().addAll(gameMap.getItems());
         gameObjects.getChildren().add(bunny.getImage());
@@ -32,6 +36,14 @@ public class GameScene extends Scene {
         root.getChildren().add(scrollableArea);
         root.getChildren().add(gameInterface);
 
+    }
+
+    public void displayMessage(String message, int size){
+        Text text = new Text(getWidth()*0.5 - size, getHeight()*0.5, message);
+        text.setFill(Color.LIGHTCORAL);
+        text.setStroke(Color.CORAL);
+        text.setFont(Font.font(size));
+        gameInterface.getChildren().add(text);
     }
 
 
