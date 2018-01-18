@@ -1,16 +1,9 @@
 import javafx.animation.AnimationTimer;
-import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
-import javafx.animation.Timeline;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import javafx.util.Duration;
 
 import java.util.ArrayList;
 
@@ -19,13 +12,17 @@ public class Actor implements Collidable{
     private ArrayList<Image> runningLeft = new ArrayList<>();
     private ArrayList<Image> runningRight = new ArrayList<>();
     private ArrayList<Image> defaultStates = new ArrayList<>();
+    private Shadow castUp;
+    private Shadow castDown;
     private ImageView playerView;
     private Image currentState;
-    public boolean isJumping = false;
     public double maxJump = 0;
+    public Action currentAction = Action.NONE;
+    private GameMap gameMap;
+    public Direction lastDirection = Direction.RIGHT;
 
 
-    public Actor(int posX, int posY){
+    public Actor(int posX, int posY, GameMap gameMap){
         fillStateLists();
         currentState = runningRight.get(0);
         playerView = new ImageView(currentState);
@@ -34,6 +31,17 @@ public class Actor implements Collidable{
         if(currentState == null){
             System.out.println("Brak obrazka");
         }
+        this.castDown = new Shadow(this, Color.DEEPPINK);
+        this.castUp = new Shadow(this, Color.DEEPPINK);
+        this.gameMap = gameMap;
+    }
+
+    public Rectangle getCastUp(){
+        return castUp.getCast();
+    }
+
+    public Rectangle getCastDown(){
+        return castDown.getCast();
     }
 
     public void move(Direction direction, double distance){
@@ -50,6 +58,7 @@ public class Actor implements Collidable{
         }
         if(newX > 0 && newX < 1950) {
             playerView.setX(newX);
+            //System.out.println(newX);
         }
     }
     public void reset(){
@@ -57,17 +66,20 @@ public class Actor implements Collidable{
         playerView.setY(1);
     }
 
-    public void jump(Direction direction){
+    public void jump(){
+        System.out.println("SKOK");
+        calculateMaxY(120);
+        currentAction = Action.JUMPING;
         new AnimationTimer(){
             @Override
             public void handle(long now) {
                 System.out.println(playerView.getY() + " " + maxJump);
-                if(playerView.getY()-3 > maxJump) {
-                    playerView.setY(playerView.getY() - 3);
-                    move(direction, 1);
+                if(playerView.getY()-4 > maxJump) {
+                    playerView.setY(playerView.getY() - 4);
+                    move(lastDirection, 1);
                 }else{
                     this.stop();
-                    isJumping = false;
+                    currentAction = Action.NONE;
                 }
             }
 
@@ -76,19 +88,52 @@ public class Actor implements Collidable{
     }
 
     public void fall(double destination){
+        System.out.println("spada!");
+        currentAction = Action.FALLING;
         new AnimationTimer(){
             @Override
             public void handle(long now) {
                // System.out.println(now);
-                if(playerView.getY()+2 < destination) {
-                    playerView.setY(playerView.getY() +2);
+                if(playerView.getY()+10 <= destination) {
+                    playerView.setY(playerView.getY() +10);
                 }else{
+                    playerView.setY(destination);
                     this.stop();
+                    //System.out.println("nie skacze");
+                    currentAction = Action.NONE;
                 }
             }
 
 
         }.start();
+    }
+
+    public void gravityCheck(){
+        double minY = calculateMinY();
+        if(minY > getY() && currentAction != Action.JUMPING && currentAction != Action.FALLING){
+           // System.out.println("is falling");
+            //currentAction = Action.FALLING;
+            fall(minY);
+            //currentAction = Action.NONE;
+        }
+    }
+
+    private double calculateMinY(){
+        castDown.updateCoords(this.getImage().getX(), this.getImage().getY());
+        while(gameMap.collision(castDown, gameMap.getBlocks()) == null && castDown.getY() < 385){
+            castDown.move(Direction.DOWN, 1);
+        }
+        return castDown.getY()-1;
+    }
+
+    public void calculateMaxY(double jumpheight){
+        double starty = getY();
+        castUp.updateCoords(getImage().getX() ,getImage().getY());
+        while(gameMap.collision(castUp, gameMap.getBlocks()) == null && castUp.getY() > starty - jumpheight  && castUp.getY() > 0){
+            castUp.move(Direction.UP, 4);
+            castUp.move(lastDirection, 1);
+        }
+        maxJump = castUp.getY()+1;
     }
 
 
@@ -111,6 +156,7 @@ public class Actor implements Collidable{
     public double getHeight(){
         return currentState.getHeight();
     }
+
 
     public ImageView getImage(){
         playerView.setImage(currentState);

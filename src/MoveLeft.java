@@ -7,13 +7,15 @@ public class MoveLeft implements Command {
 
     @Override
     public void execute() {
-        actor.changeStatePicture(Direction.LEFT);
-        actor.move(Direction.LEFT, 4);
+        if((!actor.currentAction.equals(Action.FALLING) && !actor.currentAction.equals(Action.JUMPING))) {
+            actor.changeStatePicture(Direction.LEFT);
+            actor.move(Direction.LEFT, 2);
+        }
     }
 
     @Override
     public void undo() {
         actor.changeStatePicture(Direction.RIGHT);
-        actor.move(Direction.RIGHT, 4);
+        actor.move(Direction.RIGHT, 2);
     }
 }

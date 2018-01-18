@@ -2,8 +2,11 @@ import javafx.animation.AnimationTimer;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
@@ -14,9 +17,7 @@ public class GameLoop extends AnimationTimer {
     GameMap gm;
     GameScene gameScene;
     ScoreInfo scoreInfo;
-    Shadow bunnyCastDown;
-    Shadow bunnyCastUp;
-    Direction lastDirection = Direction.RIGHT;
+    long lastUpdate = 0;
 
     GameLoop(GameScene gameScene, Actor bunny, GameMap gm, ScoreInfo si){
         listen(gameScene);
@@ -24,64 +25,53 @@ public class GameLoop extends AnimationTimer {
         this.gameScene = gameScene;
         this.gm = gm;
         this.scoreInfo = si;
-        this.bunnyCastDown = new Shadow(bunny, Color.DEEPPINK);
-        this.bunnyCastUp = new Shadow(bunny, Color.DEEPPINK);
-    }
 
-    public Shadow getCastDown(){
-        return bunnyCastDown;
     }
-
-    public Shadow getCastUp(){
-        return bunnyCastUp;
-    }
-
 
     @Override
     public void handle(long now) {
+            //System.out.println(bunny.currentAction);
+            gameScene.getScrollRoot().setHvalue(gameScene.getScrollRoot().getHmax()* (bunny.getX()/2000.0));
+            bunny.gravityCheck();
+            collectItems();
+            detectCollisions();
 
-        double minY = calculateMinY();
-        collectItems();
-        detectCollisions();
-        if(bunny.isJumping == false) {
-            bunny.fall(minY);
-            calculateMaxY(120, lastDirection);
-        }
+            statesCheck();
 
-        for(Command command: commands){
-            command.execute();
-            calculateMinY();
-            executed.add(command);
-            commands.remove(command);
+            for (Command command : commands) {
+                if(bunny.currentAction != Action.FALLING) {
+                    command.execute();
+                    executed.add(command);
+                    commands.remove(command);
+                }
 
-            System.out.println("Last executed command: " + executed.getLast().getClass());
-        }
+                //System.out.println("Last executed command: " + executed.getLast().getClass());
+
+            }
 
     }
 
-    private double calculateMinY(){
-        bunnyCastDown.updateCoords(bunny.getImage().getX() ,bunny.getImage().getY());
-        while(collision(bunnyCastDown, gm.getBlocks()) == null && bunnyCastDown.getY() < 385){
-            bunnyCastDown.move(Direction.DOWN, 1);
+    public void statesCheck(){
+        if(bunny.currentAction == Action.RUNNING_RIGHT){
+            commands.add(new MoveRight(bunny));
         }
-        return bunnyCastDown.getY()-1;
+        if(bunny.currentAction == Action.RUNNING_LEFT){
+            commands.add(new MoveLeft(bunny));
+        }
+        if(bunny.currentAction == Action.NEW_JUMP){
+            System.out.println("jest ju znwou");
+            commands.add(new Jump(bunny));
+        }
     }
 
-    private double calculateMaxY(double jumpheight, Direction direction){
-        double starty = bunny.getY();
-        bunnyCastUp.updateCoords(bunny.getImage().getX() ,bunny.getImage().getY());
-        while(collision(bunnyCastUp, gm.getBlocks()) == null && bunnyCastUp.getY() > starty - jumpheight  && bunnyCastUp.getY() > 0){
-            bunnyCastUp.move(Direction.UP, 1);
-            bunnyCastUp.move(direction, 0.25);
-        }
-        bunny.maxJump = bunnyCastUp.getY()+1;
-        return bunnyCastUp.getY()-1;
-    }
+
+
+
 
     private void detectCollisions(){
-        if(collision(bunny, gm.getBlocks()) != null){
+        if(gm.collision(bunny, gm.getBlocks()) != null){
             System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Collision");
-            bunny.fall(calculateMinY());
+            bunny.gravityCheck();
             if(!executed.isEmpty()) {
                 executed.getLast().undo();
                 executed.removeLast();
@@ -93,7 +83,7 @@ public class GameLoop extends AnimationTimer {
     }
 
     private void collectItems(){
-        Collidable collectable = collision(bunny, gm.getItems());
+        Collidable collectable = gm.collision(bunny, gm.getItems());
         if(collectable != null){
             gm.getItems().remove(collectable);
             gameScene.getGameGroup().getChildren().remove(collectable);
@@ -102,14 +92,8 @@ public class GameLoop extends AnimationTimer {
     }
 
 
-    private Collidable collision(Collidable player, ArrayList<? extends Collidable> objects){
-        for (Collidable obj : objects){
-            if(player.getBounds().intersects(obj.getBounds())){
-                return obj;
-            }
-        }
-        return null;
-    }
+
+
     public static <E> boolean containsInstance(LinkedList<E> list, Class<? extends E> commandClass) {
         return list.stream().anyMatch(e -> commandClass.isInstance(e));
     }
@@ -120,39 +104,33 @@ public class GameLoop extends AnimationTimer {
                 new EventHandler<KeyEvent>(){
                     public void handle(KeyEvent event) {
                         String eventCode = event.getCode().toString();
-                        System.out.println(eventCode);
+                        System.out.println("event code " + eventCode + " bunny state " + bunny.currentAction);
                         switch(eventCode){
                             case "RIGHT":
-                                if(!containsInstance(commands, MoveRight.class)){
-                                    commands.add(new MoveRight(bunny));
-                                    lastDirection = Direction.RIGHT;
-                                    gameScene.getScrollRoot().setHvalue(gameScene.getScrollRoot().getHvalue()+0.0032);
-                                    if(scoreInfo.getX()+4 < 1950) {
-                                        scoreInfo.setX(scoreInfo.getX() + 4);
-                                    }
-                                    System.out.println(gameScene.getScrollRoot().getHvalue());
+                                if(bunny.currentAction == Action.NONE){
+                                    bunny.lastDirection = Direction.RIGHT;
+                                    bunny.currentAction = Action.RUNNING_RIGHT;
+
                                 }
                                 break;
                             case "LEFT":
-                                if(!containsInstance(commands, MoveLeft.class)){
-                                    commands.add(new MoveLeft(bunny));
-                                    lastDirection = Direction.LEFT;
-                                    if(scoreInfo.getX()-4 > 700) {
-                                        scoreInfo.setX(scoreInfo.getX() - 4);
-                                    }
+                                if(bunny.currentAction == Action.NONE){
+                                    bunny.currentAction = Action.RUNNING_LEFT;
+                                    bunny.lastDirection = Direction.LEFT;
+
                                     gameScene.getScrollRoot().setHvalue(gameScene.getScrollRoot().getHvalue()-0.0032);
                                 }
                                 break;
                             case "UP":
-                                if(!containsInstance(commands, Jump.class) && !bunny.isJumping){
-                                    commands.add(new Jump(bunny, lastDirection));
+                                if(bunny.currentAction == Action.NONE || bunny.currentAction == Action.RUNNING_RIGHT){
+                                    bunny.currentAction = Action.NEW_JUMP;
                                 }
                                 break;
                             case "DOWN":
-                                lastDirection = Direction.NONE;
+                                bunny.lastDirection = Direction.NONE;
                                 break;
                             case "N":
-                                lastDirection = Direction.RIGHT;
+                                bunny.lastDirection = Direction.RIGHT;
                                 bunny.reset();
                                 gameScene.getScrollRoot().setHvalue(0);
                                 break;
@@ -162,5 +140,15 @@ public class GameLoop extends AnimationTimer {
                     }
                 }
         );
+        scene.setOnKeyReleased(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                String eventCode = event.getCode().toString();
+                if(bunny.currentAction == Action.RUNNING_RIGHT || bunny.currentAction == Action.RUNNING_LEFT) {
+                    System.out.println("out!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    bunny.currentAction = Action.NONE;
+                }
+            }
+        });
     }
 }

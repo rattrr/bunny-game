@@ -1,13 +1,19 @@
 import javafx.scene.Group;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.CycleMethod;
 import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.Stop;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 
 public class Background {
-    private Group group = new Group();
+    private StackPane group = new StackPane();
 
     public Background(double width, double height){
         Rectangle background = new Rectangle(width, height);
@@ -21,9 +27,8 @@ public class Background {
         group.getChildren().addAll(c, c2);
     }
 
-    public Group getBackground(){
+    public StackPane getBackground(){
         return group;
     }
-
 
 }

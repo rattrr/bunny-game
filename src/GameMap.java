@@ -1,9 +1,12 @@
 import javafx.scene.Group;
+import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
 
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class GameMap implements Serializable{
     private ArrayList<Block> blocks = new ArrayList<>();
@@ -14,11 +17,9 @@ public class GameMap implements Serializable{
         load();
     }
 
-
-    public Group getBackground() {
+    public StackPane getBackground() {
         return background.getBackground();
     }
-
 
     public ArrayList<Block> getBlocks(){
         return blocks;
@@ -45,6 +46,15 @@ public class GameMap implements Serializable{
         catch (Exception e)
         {
             e.printStackTrace(); }
+    }
+
+    public Collidable collision(Collidable player, ArrayList<? extends Collidable> objects){
+        for (Collidable obj : objects){
+            if(player.getBounds().intersects(obj.getBounds())){
+                return obj;
+            }
+        }
+        return null;
     }
 
 }

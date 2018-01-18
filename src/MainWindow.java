@@ -15,7 +15,7 @@ public class MainWindow extends Stage {
     }
 
     public void initGame(){
-        ScrollPane gameRoot = new ScrollPane();
+        StackPane gameRoot = new StackPane();
 
         GameMap gameMap = new GameMap();
 

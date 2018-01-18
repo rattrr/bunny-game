@@ -1,48 +1,48 @@
-import javafx.event.EventHandler;
 import javafx.scene.Group;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 
-import java.awt.*;
 
 public class GameScene extends Scene {
     private MainWindow stage;
-    private GameLoop gloop;
-    private ScrollPane root;
-    private Group ggroup = new Group();
+    private GameLoop gameLoop;
+    private ScrollPane scrollableArea = new ScrollPane();
+    private Group gameObjects = new Group();
+    private Pane gameInterface = new Pane();
 
-    public GameScene(ScrollPane root, MainWindow stage, double width, double height, GameMap gameMap) {
+    public GameScene(StackPane root, MainWindow stage, double width, double height, GameMap gameMap) {
         super(root, width, height);
-        this.root = root;
         this.stage = stage;
-        root.setContent(ggroup);
-        root.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        root.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        Actor bunny = new Actor(1, 1);
-        ScoreInfo scoreInfo = new ScoreInfo(700, 50);
-        ggroup.getChildren().add(gameMap.getBackground());
-        ggroup.getChildren().addAll(gameMap.getBlocks());
-        ggroup.getChildren().addAll(gameMap.getItems());
-        ggroup.getChildren().add(bunny.getImage());
-        ggroup.getChildren().add(scoreInfo);
-        gloop = new GameLoop(this, bunny, gameMap, scoreInfo);
-        //ggroup.getChildren().add(gloop.getCastDown().getCast());
-        //ggroup.getChildren().add(gloop.getCastUp().getCast());
-        gloop.start();
+        scrollableArea.setContent(gameObjects);
+        scrollableArea.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollableArea.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        Actor bunny = new Actor(1, 1, gameMap);
+        gameObjects.getChildren().add(gameMap.getBackground());
+        gameObjects.getChildren().addAll(gameMap.getBlocks());
+        gameObjects.getChildren().addAll(gameMap.getItems());
+        gameObjects.getChildren().add(bunny.getImage());
+        gameObjects.getChildren().add(bunny.getCastUp());
+        gameObjects.getChildren().add(bunny.getCastDown());
+        ScoreInfo scoreInfo = new ScoreInfo(732, 50);
+        gameLoop = new GameLoop(this, bunny, gameMap, scoreInfo);
+        gameLoop.start();
+        gameInterface.getChildren().add(scoreInfo);
+        root.getChildren().add(scrollableArea);
+        root.getChildren().add(gameInterface);
 
     }
 
 
 
     public Group getGameGroup(){
-        return ggroup;
+        return gameObjects;
     }
 
     public MainWindow getStage() {
         return stage;
     }
 
-    public ScrollPane getScrollRoot(){ return root;}
+    public ScrollPane getScrollRoot(){ return scrollableArea;}
 }
