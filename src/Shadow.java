@@ -39,7 +39,7 @@ public class Shadow implements Collidable {
                 newX += px;
                 break;
         }
-        if(newX > 0 && newX < 2000) {
+        if(newX > 0 && newX < 2000 - actor.getWidth()) {
             shape.setX(newX);
         }
         if(newY > 0 && newY < 410){
@@ -51,6 +51,8 @@ public class Shadow implements Collidable {
     public double getY(){ return shape.getY(); }
 
     public Bounds getBounds(){
+        //System.out.println(actor.getWidth() + " " + actor.getHeight());
+        //updateSize(actor.getWidth(), actor.getHeight());
         return shape.getBoundsInLocal();
     }
 

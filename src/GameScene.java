@@ -11,6 +11,8 @@ import javafx.scene.text.Text;
 public class GameScene extends Scene {
     private MainWindow stage;
     private GameLoop gameLoop;
+    private GameMap gameMap;
+    private Actor bunny;
     private ScrollPane scrollableArea = new ScrollPane();
     private Group gameObjects = new Group();
     private Pane gameInterface = new Pane();
@@ -18,17 +20,18 @@ public class GameScene extends Scene {
     public GameScene(StackPane root, MainWindow stage, double width, double height, GameMap gameMap) {
         super(root, width, height);
         this.stage = stage;
+        this.gameMap = gameMap;
         scrollableArea.setContent(gameObjects);
         scrollableArea.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scrollableArea.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        Actor bunny = new Actor(20, 20, gameMap);
+        bunny = new Actor(20, 20, gameMap);
         gameObjects.getChildren().add(gameMap.getBackground());
         gameObjects.getChildren().add(gameMap.getGoal());
         gameObjects.getChildren().addAll(gameMap.getBlocks());
-        gameObjects.getChildren().addAll(gameMap.getItems());
+        gameObjects.getChildren().addAll(gameMap.getCollectables());
         gameObjects.getChildren().add(bunny.getImage());
         gameObjects.getChildren().add(bunny.getCastUp());
-        gameObjects.getChildren().add(bunny.getCastDown());
+        //gameObjects.getChildren().add(bunny.getCastDown());
         ScoreInfo scoreInfo = new ScoreInfo(732, 50);
         gameLoop = new GameLoop(this, bunny, gameMap, scoreInfo);
         gameLoop.start();
@@ -46,15 +49,21 @@ public class GameScene extends Scene {
         gameInterface.getChildren().add(text);
     }
 
+    public void resetScrollPosition(){
+        scrollableArea.setHvalue(0);
+    }
+
+    public void updateScrollPosition(){
+        scrollableArea.setHvalue(scrollableArea.getHmax() * ((bunny.getX() + bunny.getWidth()) / gameMap.getWidth()));
+    }
 
 
     public Group getGameGroup(){
         return gameObjects;
     }
 
-    public MainWindow getStage() {
-        return stage;
+    public void backToMenu() {
+        stage.initMenu();
     }
 
-    public ScrollPane getScrollRoot(){ return scrollableArea;}
 }

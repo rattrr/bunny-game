@@ -9,13 +9,13 @@ public class MoveRight implements Command {
     public void execute() {
         if((!actor.currentAction.equals(Action.FALLING) && !actor.currentAction.equals(Action.JUMPING))) {
             actor.changeStatePicture(Direction.RIGHT);
-            actor.move(Direction.RIGHT, 2);
+            actor.run(Direction.RIGHT, 2);
         }
     }
 
     @Override
     public void undo() {
         actor.changeStatePicture(Direction.LEFT);
-        actor.move(Direction.LEFT, 2);
+        actor.run(Direction.LEFT, 2);
     }
 }

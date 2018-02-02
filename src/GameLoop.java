@@ -34,7 +34,7 @@ public class GameLoop extends AnimationTimer {
             gameScene.displayMessage("U LOSE!", 100);
             this.stop();
         }else{
-            gameScene.getScrollRoot().setHvalue(gameScene.getScrollRoot().getHmax() * ((bunny.getX() + 25) / 2000.0));
+            gameScene.updateScrollPosition();
             bunny.gravityCheck();
             collectItems();
             detectCollisions();
@@ -67,22 +67,23 @@ public class GameLoop extends AnimationTimer {
 
 
     private void detectCollisions(){
-        if(gameMap.collision(bunny, gameMap.getBlocks()) != null){
+        if(gameMap.collisionWithBlocks(bunny) != null){
+            System.out.println("kolizjaaaaaaaaaaaaaaaaaaaaaaa");
             bunny.gravityCheck();
             if(!executed.isEmpty()) {
                 executed.getLast().undo();
                 executed.removeLast();
             }else{
                 bunny.reset();
-                gameScene.getScrollRoot().setHvalue(0);
+                gameScene.resetScrollPosition();
             }
         }
     }
 
     private void collectItems(){
-        Collidable collectable = gameMap.collision(bunny, gameMap.getItems());
+        Collidable collectable = gameMap.collisionWithCollectable(bunny);
         if(collectable != null){
-            gameMap.getItems().remove(collectable);
+            gameMap.getCollectables().remove(collectable);
             gameScene.getGameGroup().getChildren().remove(collectable);
             scoreInfo.increment();
         }
@@ -97,6 +98,7 @@ public class GameLoop extends AnimationTimer {
                         switch(eventCode){
                             case "RIGHT":
                                 if(bunny.currentAction == Action.NONE){
+                                    System.out.println(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory());
                                     bunny.lastDirection = Direction.RIGHT;
                                     bunny.currentAction = Action.RUNNING_RIGHT;
 
@@ -107,11 +109,10 @@ public class GameLoop extends AnimationTimer {
                                     bunny.currentAction = Action.RUNNING_LEFT;
                                     bunny.lastDirection = Direction.LEFT;
 
-                                    gameScene.getScrollRoot().setHvalue(gameScene.getScrollRoot().getHvalue()-0.0032);
                                 }
                                 break;
                             case "UP":
-                                if(bunny.currentAction == Action.NONE || bunny.currentAction == Action.RUNNING_RIGHT){
+                                if(bunny.currentAction == Action.NONE || bunny.currentAction == Action.RUNNING_RIGHT || bunny.currentAction == Action.RUNNING_LEFT){
                                     bunny.currentAction = Action.NEW_JUMP;
                                 }
                                 break;
@@ -121,10 +122,10 @@ public class GameLoop extends AnimationTimer {
                             case "N":
                                 bunny.lastDirection = Direction.RIGHT;
                                 bunny.reset();
-                                gameScene.getScrollRoot().setHvalue(0);
+                                gameScene.resetScrollPosition();
                                 break;
                             case "BACK_SPACE":
-                                gameScene.getStage().initMenu();
+                                gameScene.backToMenu();
                         }
                     }
                 }
