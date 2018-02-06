@@ -1,3 +1,5 @@
+package map;
+
 import java.io.Serializable;
 
 public class MapObjectBlueprint implements Serializable{
